@@ -28,7 +28,8 @@ Knowledge Sharing - Strava data - Retrieve and use
 # Quick starter - use cases
 
 ## Use Python scripts to retieve trips and display them
-* Authenticate with the Strava API as explained in the [Setup section](#setup)
+* Authenticate with the Strava API as explained in the
+  [Setup/Get a Stava API access token section](#get-a-stava-api-access-token)
   + Store the access tokem as an environment variable:
 ```bash
 $ export STRAVA_ACCESS_TOKEN="<the-strava-api-access-token>"
@@ -49,7 +50,7 @@ $ ls -lFh data/private/strava-activity-polylines.csv
   ![Google Maps - Copy the geo coordinates](img/google-maps-lil.png)
 
 * Update the coordinates in the
-  [`python/strava-leaflet-app/templates/leaflet.html` HTML template file](python/strava-leaflet-app/templates/leaflet.html#19)
+  [`python/strava-leaflet-app/templates/leaflet.html` HTML template file](python/strava-leaflet-app/templates/leaflet.html#L19)
   for instance with a text editor
 
 * Launch the Python Flask application to decode and display the polylines on
@@ -69,6 +70,229 @@ Press CTRL+C to quit
 
 ## Interact manually with the Strava API with cURL
 
+* Authenticate with the Strava API as explained in the
+  [Setup/Get a Stava API access token section](#get-a-stava-api-access-token)
+  + Store the access tokem as an environment variable:
+```bash
+$ export STRAVA_ACCESS_TOKEN="<the-strava-api-access-token>"
+```
+
+### Retrieve a few details from the Strava profile
+* Retrieve a few details from the Strava profile:
+```bash
+$ curl -s -X GET https://www.strava.com/api/v3/athlete -H "Authorization: Bearer $STRAVA_ACCESS_TOKEN" | jq
+```
+```javascript
+{
+  "id": 123456789,
+  "username": null,
+  "resource_state": 2,
+  "firstname": "John",
+  "lastname": "Doe",
+  "bio": null,
+  "city": "Lille",
+  "state": "Nord",
+  "country": "France",
+  "sex": "M",
+  "premium": false,
+  "summit": false,
+  "created_at": "2023-07-02T15:32:42Z",
+  "updated_at": "2023-07-03T10:03:39Z",
+  "badge_type_id": 0,
+  "weight": 80,
+  "profile_medium": "https://graph.facebook.com/1234567890123456/picture?height=256&width=256",
+  "profile": "https://graph.facebook.com/1234567890123456/picture?height=256&width=256",
+  "friend": null,
+  "follower": null
+}
+```
+
+### Retrieve the list of activities/trips
+* Reference:
+  https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities
+```bash
+curl -s -X GET https://www.strava.com/api/v3/athlete/activities -H 'Authorization: Bearer 82305f579f99247b6652e41b9e42b11c4b5e1185' | jq 2>&1 | tee data.private/strava-activities.json
+cat data.private/strava-activities.json | jq
+```
+```javascript
+[
+  {
+    "resource_state": 2,
+    "athlete": {
+      "id": 123456789,
+      "resource_state": 1
+    },
+    "name": "Evening Ride",
+    "distance": 1471.8,
+    "moving_time": 279,
+    "elapsed_time": 279,
+    "total_elevation_gain": 0,
+    "type": "Ride",
+    "sport_type": "Ride",
+    "workout_type": 12,
+    "id": 9376697877,
+    "start_date": "2023-07-02T18:31:09Z",
+    "start_date_local": "2023-07-02T20:31:09Z",
+    "timezone": "(GMT+01:00) Europe/Paris",
+    "utc_offset": 7200,
+    "location_city": null,
+    "location_state": null,
+    "location_country": "France",
+    "achievement_count": 0,
+    "kudos_count": 6,
+    "comment_count": 0,
+    "athlete_count": 1,
+    "photo_count": 0,
+    "map": {
+      "id": "a123456789",
+      "summary_polyline": "}adtHo`yQ_@{@kA{AcEqGiNgUqEsHyBeDgDeGeDeFoK{P_@q@JUNQHCLHDC",
+      "resource_state": 2
+    },
+    "trainer": false,
+    "commute": true,
+    "manual": false,
+    "private": false,
+    "visibility": "followers_only",
+    "flagged": false,
+    "gear_id": "b12769770",
+    "start_latlng": [
+      50.65,
+      3.08
+    ],
+    "end_latlng": [
+      50.66,
+      3.09
+    ],
+    "average_speed": 5.275,
+    "max_speed": 7.2,
+	...
+    "has_kudoed": false
+  },
+  …
+]
+```
+
+* Extract a few details from the JSON file as a CSV file:
+```bash
+$ cat data.private/strava-activities.json | jq -r '.[]|[.id,.start_date,.name,.type,.sport_type,.distance,.elev_high,.elev_low,.moving_time,.elapsed_time,.average_speed,.max_speed,.average_watts,.kilojoules,.average_heartrate,.location_country,.timezone,.utc_offset,.start_latlng[],.end_latlng[],.private,.gear_id]|@csv'  | sed -e 's/"//g' 
+123456789,2023-07-02T18:31:09Z,Evening Ride,Ride,Ride,1471.8,39.4,25.6,279,279,5.275,7.2,57.8,16.1,140.1,France,(GMT+01:00) Europe/Paris,7200,50.65,3.08,50.66,3.09,false,123456789
+…
+```
+
+### Retrieve the details for a specific activity
+* Reference:
+  https://developers.strava.com/docs/reference/#api-Activities-getActivityById
+  
+* Launch cURL:
+```bash
+$ curl -s -X GET "https://www.strava.com/api/v3/activities/123456789" -H 'Authorization: Bearer 82305f579f99247b6652e41b9e42b11c4b5e1185' | jq 2>&1 | tee strava-activity-detail.json
+```
+```javascript
+{
+  "resource_state": 3,
+  "athlete": {
+    "id": 123456789,
+    "resource_state": 1
+  },
+  "name": "Lunch Gravel Ride",
+  "distance": 55984.1,
+  ...
+  "map": {
+    "id": "a9374290388",
+    "polyline": "oyfXxxxE@@@",
+    "resource_state": 3,
+    "summary_polyline": "_tftXxxxiDpE"
+  },
+  "trainer": false,
+  ...
+  "start_latlng": [
+    50.66,
+    3.10
+  ],
+  "end_latlng": [
+    50.66,
+    3.10
+  ],
+  "average_speed": 5.111,
+  ...
+  "segment_efforts": [
+    {
+      "id": 123456789,
+      "resource_state": 2,
+      "name": "Avenue de la République - Croisé-Laroche - Clémenceau (vers l'ouest)",
+      "activity": {
+        "id": 123456789,
+        "resource_state": 1
+      },
+	  ...
+      "segment": {
+        "id": 20239919,
+        "resource_state": 2,
+        "name": "Avenue de la République - Croisé-Laroche - Clémenceau (vers l'ouest)",
+        "activity_type": "Ride",
+		...
+      },
+      "pr_rank": 3,
+      "achievements": [
+        {
+          "type_id": 3,
+          "type": "pr",
+          "rank": 3
+        }
+      ],
+      "hidden": false
+    },
+  …
+  ],
+  "splits_metric": [
+    {
+      "distance": 1000.9,
+      "elapsed_time": 218,
+	  ...
+      "pace_zone": 0
+    },
+    …
+  ],
+  "splits_standard": [
+    {
+      "distance": 1610.3,
+      "elapsed_time": 334,
+	  ...
+      "pace_zone": 0
+    },
+    …
+  ],
+  "laps": [
+    {
+      "id": 31984370773,
+      "resource_state": 2,
+      "name": "Lap 1",
+	  ...
+      "split": 1
+    }
+  ],
+  "gear": {
+    "id": "123456789",
+    "primary": false,
+    "name": "RockRider ST540 S",
+	...
+    "converted_distance": 1100.9
+  },
+  "photos": {
+    ...
+  },
+  "stats_visibility": [
+    {
+      "type": "heart_rate",
+      "visibility": "everyone"
+    },
+	...
+  ],
+  "hide_from_home": false,
+  "device_name": "Apple Watch SE",
+  ...
+}
+```
 
 ## Decode a polyline
 The quickest to decode a polyline is to go on
@@ -96,12 +320,34 @@ $ python -mpip install -U pip
 $ python -mpip install -U flask
 ```
 
+## Create an application for Strava API
+To start developing with the Strava API, you will need to make an application
+* If you have not already, go to https://www.strava.com/register and sign up
+  for a Strava account.
+* After you are logged in, go to https://www.strava.com/settings/api
+  and create an app.
+* You should see the “My API Application” page now. Here is what everything
+  means:
+  + Category: The category you chose for your application
+  + Club: Will show if you have a club associated with your application
+  + Client ID: Your application ID
+  + Client Secret: Your client secret (please keep this confidential)
+  + Authorization token: Your authorization token which will change
+    every six hours (please keep this confidential)
+  + Your Refresh token: The token you will use to get a new authorization
+    token (please keep this confidential)
+  + Rate limits: Your current rate limit
+  + Authorization Callback Domain: When building your app, change
+    “Authorization Callback Domain” to localhost or any domain.
+	When taking your app live, change “Authorization Callback Domain”
+	to a real domain.
+
 ## Get a Stava API access token
 * The access token is valid only for 6 hours, and needs to be refreshed
   every so often
 
 * Get a Strava API authorization code by opening
-  open "http://www.strava.com/oauth/authorize?client_id=110070&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read_all,activity:read_all"
+  open "http://www.strava.com/oauth/authorize?client_id=<strava-api-client-id>&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read_all,activity:read_all"
   + Click on the Authorize button
   + In the URL of the just opened page (displaying an error), copy the `code`
     value, it corresponds to the Strava API authorization code
@@ -111,8 +357,40 @@ $ python -mpip install -U flask
 $ curl -s -X POST https://www.strava.com/oauth/token -F client_id=<strava-api-client-id> -F client_secret=<strava-api-client-secret> -F code=<strava-api-authorization-code> -F grant_type=authorization_code | jq
 ```
 ```javascript
-
+{
+  "token_type": "Bearer",
+  "expires_at": 1688424735,
+  "expires_in": 19659,
+  "refresh_token": "1a5b02some-tokena42a15",
+  "access_token": "7f988some-token950db8",
+  "athlete": {
+    "id": 123456789,
+    "username": null,
+    "resource_state": 2,
+    "firstname": "John",
+    "lastname": "Doe",
+    "bio": null,
+    "city": "Lille",
+    "state": "Nord",
+    "country": "France",
+    "sex": "M",
+    "premium": false,
+    "summit": false,
+    "created_at": "2023-07-02T15:32:42Z",
+    "updated_at": "2023-07-03T10:03:39Z",
+    "badge_type_id": 0,
+    "weight": 80,
+    "profile_medium": "https://graph.facebook.com/1234567890123456/picture?height=256&width=256",
+    "profile": "https://graph.facebook.com/1234567890123456/picture?height=256&width=256",
+    "friend": null,
+    "follower": null
+  }
+}
 ```
 
-
+* The access token is the value corresponding to the `access_token` key.
+  Store it in the `STRAVA_ACCESS_TOKEN` variable:
+```bash
+$ export STRAVA_ACCESS_TOKEN="7f988some-token950db8"
+```
 
