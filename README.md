@@ -35,6 +35,28 @@ these companies.
 
 # References
 
+## Jupyter amd Spark
+The
+[DataBricks examples project on GitHub](https://github.com/data-engineering-helpers/databricks-examples)
+explains how to setup PySpark and Jupyter Lab so that Jupyter notebooks use
+[Spark Connect](https://spark.apache.org/docs/latest/spark-connect-overview.html):
+* [GitHub - DataBricks examples - ](https://github.com/data-engineering-helpers/databricks-examples/blob/main/README.md#initial-setup)
+* Most of the Jupyter notebook examples in this project make use of
+  Spark Connect. Refer to the above-mentioned project to setup Jupyter, Spark
+  and Spark Connect properly
+
+### Spark
+* [Apache Spark - Download Spark manually](https://spark.apache.org/docs/latest/api/python/getting_started/install.html#manually-downloading)
+* [Apache Spark - Doc - Getting started / Installation](https://spark.apache.org/docs/latest/api/python/getting_started/install.html)
+
+## Spark Connect
+* [Apache Spark - Doc - Spark Connect - Overview](https://spark.apache.org/docs/latest/spark-connect-overview.html)
+* [Apache Spark - Doc - Spark Connect - Quick start](https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_connect.html)
+* [GitHub - Data Engineering Helpers - Example of Jupyter notebook using Spark Connect](https://github.com/data-engineering-helpers/databricks-examples/blob/main/ipython-notebooks/simple-connect.ipynb)
+
+### Jupyter
+* [BMC - Integrate PySpark with Jupyter](https://www.bmc.com/blogs/jupyter-notebooks-apache-spark/)
+
 ## Strava API
 * [Strava API homepage](https://developers.strava.com/)
 * [Strava API - Getting started](https://developers.strava.com/docs/getting-started/)
@@ -62,7 +84,65 @@ these companies.
 * [Auth0 - Hello World Full-Stack Security:
 Vue.js v2/JavaScript + FastAPI/Python](https://developer.auth0.com/resources/code-samples/full-stack/hello-world/basic-access-control/spa/vue-v2-javascript/fastapi-python)
 
-# Quick starter - use cases
+# Quick starter
+
+## Launch Jupyter with a PySpark/Spark Connect client kernel
+* From a dedicated terminal window/tab, launch Spark Connect server.
+  Note that the `SPARK_REMOTE` environment variable should not be set at this
+  stage, otherwise the Spark Connect server will try to connect to the
+  corresponding Spark Connect server and will therefore not start
+```bash
+$ sparkconnectstart
+```
+
+* From the current terminal/tab, different from the window/tab having launched
+  the Spark Connect server, launch PySpark from the command-line, which in
+  turn launches Jupyter Lab
+  + Follow the details given by PySpark to open Jupyter in a web browser
+```bash
+$ export SPARK_REMOTE="sc://localhost:15002"; pyspark
+...
+[C 2023-06-27 21:54:04.720 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file://$HOME/Library/Jupyter/runtime/jpserver-21219-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:8889/lab?token=dd69151c26a3b91fabda4b2b7e9724d13b49561f2c00908d
+        http://127.0.0.1:8889/lab?token=dd69151c26a3b91fabda4b2b7e9724d13b49561f2c00908d
+...
+```
+  + Open Jupyter in a web browser. For instance, on MacOS:
+```bash
+$ open ~/Library/Jupyter/runtime/jpserver-*-open.html
+```
+
+* Open a notebook, for instance
+  [`jupyter-notebooks/simple-connect.ipynb`](https://github.com/data-engineering-helpers/databricks-examples/blob/main/jupyter-notebooks/simple-connect.ipynb)
+  + Run the cells. The third cell should give a result like:
+```txt
++-------+--------+-------+-------+
+|User ID|Username|Browser|     OS|
++-------+--------+-------+-------+
+|   1580|   Barry|FireFox|Windows|
+|   5820|     Sam|MS Edge|  Linux|
+|   2340|   Harry|Vivaldi|Windows|
+|   7860|  Albert| Chrome|Windows|
+|   1123|     May| Safari|  macOS|
++-------+--------+-------+-------+
+```
+
+* Notes:
+  + The first cell stops the initial Spark session,
+    which has been started by Spark without making use of Spark Connect.
+    There is a try-catch clause, as once the Spark session has been
+    started through Spark Connect, it cannot be stopped that way;
+    the first cell may thus be re-executed at will with no further
+    side-effect on the Spark session
+  + The same first cell then starts, or uses when already existing,
+    the Spark session through Spark Connect
+
+
+# Use cases
 
 ## Use Python scripts to retieve trips and display them
 * Authenticate with the Strava API as explained in the
