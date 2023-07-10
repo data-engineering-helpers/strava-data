@@ -77,6 +77,11 @@ explains how to setup PySpark and Jupyter Lab so that Jupyter notebooks use
 * [Leaflet - Quick start guide](https://leafletjs.com/examples/quick-start/)
 * [GitHub - Leaflet project](https://github.com/Leaflet/Leaflet)
 
+### Leaflet in Jupyter
+* [GitHub - Folium](https://github.com/python-visualization/folium)
+* [GitHub - iPyLeaflet](https://github.com/jupyter-widgets/ipyleaflet)
+  + [ReadTheDocs - iPyLeaflet](https://ipyleaflet.readthedocs.io/en/latest/index.html)
+
 ## Build an application with Vue and FastAPI
 * [StackOverflow - How to connect VueJS and FastAPI](https://stackoverflow.com/questions/64522736/how-to-connect-vue-js-as-frontend-and-fastapi-as-backend)
 * [GitHub - TestDriven.io - Developing a Single Page App with FastAPI and Vue.js](https://github.com/testdrivenio/fastapi-vue/tree/main)
@@ -117,34 +122,21 @@ $ open ~/Library/Jupyter/runtime/jpserver-*-open.html
 ```
 
 * Open a notebook, for instance
-  [`jupyter-notebooks/simple-connect.ipynb`](https://github.com/data-engineering-helpers/databricks-examples/blob/main/jupyter-notebooks/simple-connect.ipynb)
-  + Run the cells. The third cell should give a result like:
-```txt
-+-------+--------+-------+-------+
-|User ID|Username|Browser|     OS|
-+-------+--------+-------+-------+
-|   1580|   Barry|FireFox|Windows|
-|   5820|     Sam|MS Edge|  Linux|
-|   2340|   Harry|Vivaldi|Windows|
-|   7860|  Albert| Chrome|Windows|
-|   1123|     May| Safari|  macOS|
-+-------+--------+-------+-------+
-```
-
-* Notes:
-  + The first cell stops the initial Spark session,
-    which has been started by Spark without making use of Spark Connect.
-    There is a try-catch clause, as once the Spark session has been
-    started through Spark Connect, it cannot be stopped that way;
-    the first cell may thus be re-executed at will with no further
-    side-effect on the Spark session
-  + The same first cell then starts, or uses when already existing,
-    the Spark session through Spark Connect
-
+  [`ipython-notebooks/strava-fetch-and-display-activities.ipynb`](http://localhost:8889/lab/tree/ipython-notebooks/strava-fetch-and-display-activities.ipynb)
+  ([source code on GitHub](https://github.com/data-engineering-helpers/strava-data/blob/main/ipython-notebooks/strava-fetch-and-display-activities.ipynb))
+  + Run the cells. The last cell should display a Leaflet map with
+    the activities/trips retrieved from Strava
 
 # Use cases
 
-## Use Python scripts to retieve trips and display them
+## Use Jupyter Lab to retrieve trips and display them
+* Open the
+  [`strava-fetch-and-display-activities.ipynb` notebook](http://localhost:8889/lab/tree/ipython-notebooks/strava-fetch-and-display-activities.ipynb)
+  ([`strava-fetch-and-display-activities.ipynb` source code on GitHub](https://github.com/data-engineering-helpers/strava-data/blob/main/ipython-notebooks/strava-fetch-and-display-activities.ipynb))
+  + Run the cells. The last cell should display a Leaflet map with
+    the activities/trips retrieved from Strava
+
+## Use Python scripts to retrieve trips and display them
 * Authenticate with the Strava API as explained in the
   [Setup/Get a Stava API access token section](#get-a-stava-api-access-token)
   + Store the access tokem as an environment variable:
@@ -434,7 +426,12 @@ $ python -mpip install -U pip
 
 * Install a few Python libraries:
 ```bash
-$ python -mpip install -U flask
+$ python -mpip install -U ipyleaflet
+```
+
+* Install a few JupyterLab extensions (_e.g._, Leaflet):
+```bash
+$ jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-leaflet
 ```
 
 ## Create an application for Strava API
