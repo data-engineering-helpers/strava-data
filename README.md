@@ -418,6 +418,11 @@ and:
 * Confirm in the dialog box/pop up window
 
 # Setup
+* If PySpark is to be used with Spark Connect, which makes the whole process
+  more repeatable/industrial, there are some subtleties in the setup process.
+  Follow the instructions on
+  [GitHub - DataBricks example peoject](https://github.com/data-engineering-helpers/databricks-examples#pyspark-and-jupyter)
+  for more details.
 
 ## Python environment
 * It is recommended to use PyEnv and to install a fairly recent stable Python
@@ -430,7 +435,17 @@ $ python -mpip install -U pip
 
 * Install a few Python libraries:
 ```bash
-$ python -mpip install -U ipyleaflet
+$ python -mpip install -U plotly pyvis folium
+```
+
+* Install PySpark:
+```bash
+$ python -mpip install -U pyspark[connect,sql,pandas_on_spark] pytest-spark
+```
+
+* Install JupterLab:
+```bash
+$ python -mpip install -U jupyterlab
 ```
 
 * Install a few JupyterLab extensions (_e.g._, Leaflet):
