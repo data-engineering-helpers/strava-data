@@ -3,14 +3,24 @@ Knowledge Sharing - Strava data - Retrieve and use
 
 # Table of Content (ToC)
 * [Knowledge Sharing \- Strava data \- Retrieve and use](#knowledge-sharing---strava-data---retrieve-and-use)
+* [Table of Content (ToC)](#table-of-content-toc)
 * [Overview](#overview)
 * [References](#references)
+  * [Jupyter amd Spark](#jupyter-amd-spark)
+    * [Spark](#spark)
+  * [Spark Connect](#spark-connect)
+    * [Jupyter](#jupyter)
   * [Strava API](#strava-api)
+    * [Authentication \- OAuth](#authentication---oauth)
   * [Decode Polylines](#decode-polylines)
   * [Leaflet](#leaflet)
+    * [Leaflet in Jupyter](#leaflet-in-jupyter)
   * [Build an application with Vue and FastAPI](#build-an-application-with-vue-and-fastapi)
-* [Quick starter \- use cases](#quick-starter---use-cases)
-  * [Use Python scripts to retieve trips and display them](#use-python-scripts-to-retieve-trips-and-display-them)
+* [Quick starter](#quick-starter)
+  * [Launch Jupyter with a PySpark/Spark Connect client kernel](#launch-jupyter-with-a-pysparkspark-connect-client-kernel)
+* [Use cases](#use-cases)
+  * [Use Jupyter Lab to retrieve trips and display them](#use-jupyter-lab-to-retrieve-trips-and-display-them)
+  * [Use Python scripts to retrieve trips and display them](#use-python-scripts-to-retrieve-trips-and-display-them)
   * [Interact manually with the Strava API with cURL](#interact-manually-with-the-strava-api-with-curl)
     * [Retrieve a few details from the Strava profile](#retrieve-a-few-details-from-the-strava-profile)
     * [Retrieve the list of activities/trips](#retrieve-the-list-of-activitiestrips)
@@ -19,7 +29,13 @@ Knowledge Sharing - Strava data - Retrieve and use
 * [Setup](#setup)
   * [Python environment](#python-environment)
   * [Create an application for Strava API](#create-an-application-for-strava-api)
-  * [Get a Stava API access token](#get-a-stava-api-access-token)
+  * [Authorize the application to use Strava API](#authorize-the-application-to-use-strava-api)
+    * [Generate an authorization code with the internet browser](#generate-an-authorization-code-with-the-internet-browser)
+  * [Generate an access token](#generate-an-access-token)
+    * [Generate the access and refresh tokens with the CLI](#generate-the-access-and-refresh-tokens-with-the-cli)
+      * [Store the access and refresh tokens as environment variables](#store-the-access-and-refresh-tokens-as-environment-variables)
+    * [Refresh the access and refresh tokens with the CLI](#refresh-the-access-and-refresh-tokens-with-the-cli)
+      * [Store the access token as environment variable](#store-the-access-token-as-environment-variable)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc.go)
 
@@ -142,7 +158,7 @@ $ open ~/Library/Jupyter/runtime/jpserver-*-open.html
 
 ## Use Python scripts to retrieve trips and display them
 * Authenticate with the Strava API as explained in the
-  [Setup/Get a Stava API access token section](#get-a-stava-api-access-token)
+  [Generate an access token section](#generate-an-access-token)
   + Store the access tokem as an environment variable:
 ```bash
 $ export STRAVA_ACCESS_TOKEN="<the-strava-api-access-token>"
@@ -184,10 +200,10 @@ Press CTRL+C to quit
 ## Interact manually with the Strava API with cURL
 
 * Authenticate with the Strava API as explained in the
-  [Setup/Get a Stava API access token section](#get-a-stava-api-access-token)
+  [Generate an access token section](#generate-an-access-token)
   + Store the access tokem as an environment variable:
 ```bash
-$ export STRAVA_ACCESS_TOKEN="<the-strava-api-access-token>"
+$ export STRAVA_ACCESS_TOKEN="<strava-api-access-token>"
 ```
 
 ### Retrieve a few details from the Strava profile
@@ -475,19 +491,55 @@ To start developing with the Strava API, you will need to make an application
 	When taking your app live, change “Authorization Callback Domain”
 	to a real domain.
 
-## Get a Stava API access token
-* The access token is valid only for 6 hours, and needs to be refreshed
-  every so often
+## Authorize the application to use Strava API
+* The authorization process has to be done just once every so often
+* The user (you, me) has to authorize the application (this application
+  we are building here) to use the Strava API. The application is known
+  to Strava API and appears on https://www.strava.com/settings/apps .
+  If this is not the case yet, one can easily register a new application
+  to use the Strava API (on https://www.strava.com/settings/api)
+* Be sure to have the following Strava API details at hand,
+  from https://www.strava.com/settings/api:
+  + Client ID
+  + Client secret
+* Save those details as environment variables (_e.g._, in the
+  `~/.bashrc`/`~/.zshrc` file):
+```bash
+export STRAVA_CLIENT_ID="<the-strava-client-id>"
+export STRAVA_CLIENT_SECRET="<the-strava-client-secret>"
+export STRAVA_ACCESS_TOKEN="" # empty for now
+export STRAVA_REFRESH_TOKEN="" # empty for now
+```
 
-* Get a Strava API authorization code by opening
-  open "http://www.strava.com/oauth/authorize?client_id=<strava-api-client-id>&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read_all,activity:read_all"
+### Generate an authorization code with the internet browser
+* Get a Strava API authorization code by opening the following link
+  (be careful to replace `strava-api-client-id` with your own Strava API
+  client ID, which should read something like 1234567):
+  + Open
+    http://www.strava.com/oauth/authorize?client_id=strava-api-client-id&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read_all,activity:read_all
   + Click on the Authorize button
   + In the URL of the just opened page (displaying an error), copy the `code`
     value, it corresponds to the Strava API authorization code
+* The Strava API authorization code remains valid for a long time
+  (several days). You can save it along with other passwords (_e.g._,
+  in a password manager) or in a private MS Word/Google Doc/text document.
+* The authorization code is then used to generate both:
+  + A refresh token, which has roughly the same validity
+    as the authorization code
+  + An access token, which itself is valid only for a limited period
+    of time (typically, a few hours).
+	That access token may be re-generated as many times as needed thanks
+	to the refresh token.
+    The access token is what the Strava API needs to answer to API requests
 
-* Use cURL on the command-line to create an access code (and the refresh code):
+## Generate an access token
+Perform either of the following two tasks
+
+### Generate the access and refresh tokens with the CLI
+* To be performed when the refresh token is deprecated or when there is no refresh token yet
+* Use cURL on the command-line to create the access code (and the refresh code):
 ```bash
-$ curl -s -X POST https://www.strava.com/oauth/token -F client_id=<strava-api-client-id> -F client_secret=<strava-api-client-secret> -F code=<strava-api-authorization-code> -F grant_type=authorization_code | jq
+curl -s -X POST https://www.strava.com/oauth/token -F client_id=$STRAVA_CLIENT_ID -F client_secret=$STRAVA_CLIENT_SECRET -F code=<strava-api-authorization-code> -F grant_type=authorization_code | jq
 ```
 ```javascript
 {
@@ -521,9 +573,22 @@ $ curl -s -X POST https://www.strava.com/oauth/token -F client_id=<strava-api-cl
 }
 ```
 
-* The access token is the value corresponding to the `access_token` key.
-  Store it in the `STRAVA_ACCESS_TOKEN` variable:
+#### Store the access and refresh tokens as environment variables
+* Store the access and refresh tokens as environment variables:
 ```bash
-$ export STRAVA_ACCESS_TOKEN="7f988some-token950db8"
+export STRAVA_ACCESS_TOKEN="<strava-api-access-token>"
+export STRAVA_REFRESH_TOKEN="<strava-api-refresh-token>"
+```
+
+### Refresh the access and refresh tokens with the CLI
+* Use cURL on the command-line to create the access code (and the refresh code):
+```bash
+curl -s -X POST https://www.strava.com/oauth/token -F client_id=$STRAVA_CLIENT_ID -F client_secret=$STRAVA_CLIENT_SECRET -F refresh_token=<strava-api-refresh-token> -F grant_type=refresh_token | jq
+```
+
+#### Store the access token as environment variable
+* Store the access token as an environment variable:
+```bash
+export STRAVA_ACCESS_TOKEN="<strava-api-access-token>"
 ```
 
