@@ -63,6 +63,10 @@ explains how to setup PySpark and Jupyter Lab so that Jupyter notebooks use
 * [Strava API - Reference guide](https://developers.strava.com/docs/reference/)
   + [Strava API - PolylineMap model](https://developers.strava.com/docs/reference/#api-models-PolylineMap)
 
+### Authentication - OAuth
+* [Observable HQ - OAuth 2.0 client examples - Strava](https://observablehq.com/@tomlarkworthy/oauth-examples#strava)
+* [Auth0 - OAuth 2.0 Authorization framework](https://auth0.com/docs/authenticate/protocols/oauth)
+
 ## Decode Polylines
 * [StackOverflow - Strava API - How to get route image](https://stackoverflow.com/questions/48017792/strava-api-how-to-get-route-image)
 * [Google dev - Polyline algorithm](https://developers.google.com/maps/documentation/utilities/polylinealgorithm)
