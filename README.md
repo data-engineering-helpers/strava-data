@@ -574,7 +574,8 @@ curl -s -X POST https://www.strava.com/oauth/token -F client_id=$STRAVA_CLIENT_I
 ```
 
 #### Store the access and refresh tokens as environment variables
-* Store the access and refresh tokens as environment variables:
+* Store the access and refresh tokens, copied from above,
+  as environment variables:
 ```bash
 export STRAVA_ACCESS_TOKEN="<strava-api-access-token>"
 export STRAVA_REFRESH_TOKEN="<strava-api-refresh-token>"
@@ -583,11 +584,20 @@ export STRAVA_REFRESH_TOKEN="<strava-api-refresh-token>"
 ### Refresh the access and refresh tokens with the CLI
 * Use cURL on the command-line to create the access code (and the refresh code):
 ```bash
-curl -s -X POST https://www.strava.com/oauth/token -F client_id=$STRAVA_CLIENT_ID -F client_secret=$STRAVA_CLIENT_SECRET -F refresh_token=<strava-api-refresh-token> -F grant_type=refresh_token | jq
+curl -s -X POST https://www.strava.com/oauth/token -F client_id=$STRAVA_CLIENT_ID -F client_secret=$STRAVA_CLIENT_SECRET -F refresh_token=$STRAVA_REFRESH_TOKEN -F grant_type=refresh_token | jq
+```
+```javascript
+{
+  "token_type": "Bearer",
+  "access_token": "7f988some-token950db8",
+  "expires_at": 1689274725,
+  "expires_in": 12082,
+  "refresh_token": "1a5b02some-tokena42a15"
+}
 ```
 
 #### Store the access token as environment variable
-* Store the access token as an environment variable:
+* Store the access token, copied from above, as an environment variable:
 ```bash
 export STRAVA_ACCESS_TOKEN="<strava-api-access-token>"
 ```
