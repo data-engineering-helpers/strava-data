@@ -6,6 +6,8 @@ Knowledge Sharing - Strava data - Retrieve and use
 * [Table of Content (ToC)](#table-of-content-toc)
 * [Overview](#overview)
 * [References](#references)
+  * [Strava resources](#strava-resources)
+    * [Ingest sport-related data with dlt](#ingest-sport-related-data-with-dlt)
   * [Jupyter amd Spark](#jupyter-amd-spark)
     * [Spark](#spark)
   * [Spark Connect](#spark-connect)
@@ -50,6 +52,11 @@ some companies, they speak on their personal behalf and do not represent
 these companies.
 
 # References
+
+## Strava resources
+
+### Ingest sport-related data with dlt
+* Article on LinkedIn: https://www.linkedin.com/posts/data-team_github-datadisciplestrava-datastack-activity-7309881748698398743-g_dI 
 
 ## Jupyter amd Spark
 The
